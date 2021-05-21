@@ -52,7 +52,7 @@ export default class Feed extends Component {
         snapshot => {
           let stories = [];
           if (snapshot.val()) {
-            Object.keys(snapshot.val()).forEach(function(key) {
+            Object.keys(snapshot.val()).forEach(function (key) {
               stories.push({
                 key: key,
                 value: snapshot.val()[key]
@@ -62,7 +62,7 @@ export default class Feed extends Component {
           this.setState({ stories: stories });
           this.props.setUpdateToFalse();
         },
-        function(errorObject) {
+        function (errorObject) {
           console.log("The read failed: " + errorObject.code);
         }
       );
@@ -111,7 +111,7 @@ export default class Feed extends Component {
                     : styles.appTitleText
                 }
               >
-                Story Telling App
+                Storytelling App
               </Text>
             </View>
           </View>

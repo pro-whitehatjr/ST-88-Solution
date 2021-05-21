@@ -44,7 +44,7 @@ export default class LoginScreen extends Component {
       for (var i = 0; i < providerData.length; i++) {
         if (
           providerData[i].providerId ===
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
           providerData[i].uid === googleUser.getBasicProfile().getId()
         ) {
           // We don't need to reauth the Firebase connection.
@@ -71,7 +71,7 @@ export default class LoginScreen extends Component {
         firebase
           .auth()
           .signInWithCredential(credential)
-          .then(function(result) {
+          .then(function (result) {
             if (result.additionalUserInfo.isNewUser) {
               firebase
                 .database()
@@ -84,7 +84,7 @@ export default class LoginScreen extends Component {
                   last_name: result.additionalUserInfo.profile.family_name,
                   current_theme: "dark"
                 })
-                .then(function(snapshot) {});
+                .then(function (snapshot) { });
             }
           })
           .catch(error => {
@@ -138,7 +138,7 @@ export default class LoginScreen extends Component {
               source={require("../assets/logo.png")}
               style={styles.appIcon}
             ></Image>
-            <Text style={styles.appTitleText}>{`Story Telling\nApp`}</Text>
+            <Text style={styles.appTitleText}>{`Storytelling\nApp`}</Text>
           </View>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
