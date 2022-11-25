@@ -10,10 +10,11 @@ import {
   Switch
 } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
-import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 
 import firebase from "firebase";
+import * as SplashScreen from 'expo-splash-screen';
+SplashScreen.preventAutoHideAsync();
 
 let customFonts = {
   "Bubblegum-Sans": require("../assets/fonts/BubblegumSans-Regular.ttf")
@@ -74,9 +75,8 @@ export default class Profile extends Component {
   }
 
   render() {
-    if (!this.state.fontsLoaded) {
-      return <AppLoading />;
-    } else {
+    if (this.state.fontsLoaded) {
+      SplashScreen.hideAsync();
       return (
         <View
           style={

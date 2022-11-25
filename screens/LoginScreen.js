@@ -1,34 +1,40 @@
 import React, { Component } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   SafeAreaView,
   Platform,
   StatusBar,
   Image,
-  Dimensions,
-  TouchableOpacity
+  TextInput,
+  Alert,
+  TouchableOpacity,
+  Text
 } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
-import * as Google from "expo-google-app-auth";
-import firebase from "firebase";
 
-import AppLoading from "expo-app-loading";
+import firebase from "firebase";
+import { RFValue } from "react-native-responsive-fontsize";
 import * as Font from "expo-font";
 
+import * as SplashScreen from 'expo-splash-screen';
+SplashScreen.preventAutoHideAsync();
+
 let customFonts = {
-  "Bubblegum-Sans": require("../assets/fonts/BubblegumSans-Regular.ttf")
+  "Bubblegum-Sans": require("../assets/fonts/BubblegumSans-Regular.ttf"),
 };
+
+const appIcon = require("../assets/logo.png");
 
 export default class LoginScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      fontsLoaded: false
+      email: "",
+      password: "",
+      fontsLoaded: false,
+      userSignedIn: false
     };
   }
-
   async _loadFontsAsync() {
     await Font.loadAsync(customFonts);
     this.setState({ fontsLoaded: true });
@@ -38,126 +44,56 @@ export default class LoginScreen extends Component {
     this._loadFontsAsync();
   }
 
-  isUserEqual = (googleUser, firebaseUser) => {
-    if (firebaseUser) {
-      var providerData = firebaseUser.providerData;
-      for (var i = 0; i < providerData.length; i++) {
-        if (
-          providerData[i].providerId ===
-          firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
-          providerData[i].uid === googleUser.getBasicProfile().getId()
-        ) {
-          // We don't need to reauth the Firebase connection.
-          return true;
-        }
-      }
-    }
-    return false;
-  };
-
-  onSignIn = googleUser => {
-    // We need to register an Observer on Firebase Auth to make sure auth is initialized.
-    var unsubscribe = firebase.auth().onAuthStateChanged(firebaseUser => {
-      unsubscribe();
-      // Check if we are already signed-in Firebase with the correct user.
-      if (!this.isUserEqual(googleUser, firebaseUser)) {
-        // Build Firebase credential with the Google ID token.
-        var credential = firebase.auth.GoogleAuthProvider.credential(
-          googleUser.idToken,
-          googleUser.accessToken
-        );
-
-        // Sign in with credential from the Google user.
-        firebase
-          .auth()
-          .signInWithCredential(credential)
-          .then(function (result) {
-            if (result.additionalUserInfo.isNewUser) {
-              firebase
-                .database()
-                .ref("/users/" + result.user.uid)
-                .set({
-                  gmail: result.user.email,
-                  profile_picture: result.additionalUserInfo.profile.picture,
-                  locale: result.additionalUserInfo.profile.locale,
-                  first_name: result.additionalUserInfo.profile.given_name,
-                  last_name: result.additionalUserInfo.profile.family_name,
-                  current_theme: "dark"
-                })
-                .then(function (snapshot) { });
-            }
-          })
-          .catch(error => {
-            // Handle Errors here.
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            // The email of the user's account used.
-            var email = error.email;
-            // The firebase.auth.AuthCredential type that was used.
-            var credential = error.credential;
-            // ...
-          });
-      } else {
-        console.log("User already signed-in Firebase.");
-      }
-    });
-  };
-
-  signInWithGoogleAsync = async () => {
-    try {
-      const result = await Google.logInAsync({
-        behaviour: "web",
-        androidClientId:
-          "169067545995-mqh27ihvjnrnko5cqci8eo7hg68vmjqo.apps.googleusercontent.com",
-        iosClientId:
-          "169067545995-vmf6q6muvac2nhb8jcbih508n4qij34f.apps.googleusercontent.com",
-      scopes: ["profile", "email"]
+  signIn = async (email, password) => {
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      .then(() => {
+        this.props.navigation.replace("Dashboard");
+      })
+      .catch(error => {
+        Alert.alert(error.message);
       });
-
-      if (result.type === "success") {
-        this.onSignIn(result);
-        return result.accessToken;
-      } else {
-        return { cancelled: true };
-      }
-    } catch (e) {
-      console.log(e.message);
-      return { error: true };
-    }
   };
+
 
   render() {
-    if (!this.state.fontsLoaded) {
-      return <AppLoading />;
-    } else {
+    if (this.state.fontsLoaded) {
+      SplashScreen.hideAsync();
+      const { email, password } = this.state;
+
       return (
         <View style={styles.container}>
           <SafeAreaView style={styles.droidSafeArea} />
-          <View style={styles.appTitle}>
-            <Image
-              source={require("../assets/logo.png")}
-              style={styles.appIcon}
-            ></Image>
-            <Text style={styles.appTitleText}>{`Storytelling\nApp`}</Text>
-          </View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => this.signInWithGoogleAsync()}
-            >
-              <Image
-                source={require("../assets/google_icon.png")}
-                style={styles.googleIcon}
-              ></Image>
-              <Text style={styles.googleText}>Sign in with Google</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.cloudContainer}>
-            <Image
-              source={require("../assets/cloud.png")}
-              style={styles.cloudImage}
-            ></Image>
-          </View>
+
+          <Text style={styles.appTitleText}>Story Telling</Text>
+          <Image source={appIcon} style={styles.appIcon} />
+
+          <TextInput
+            style={styles.textinput}
+            onChangeText={text => this.setState({ email: text })}
+            placeholder={"Enter Email"}
+            placeholderTextColor={"#FFFFFF"}
+            autoFocus
+          />
+          <TextInput
+            style={[styles.textinput, { marginTop: 20 }]}
+            onChangeText={text => this.setState({ password: text })}
+            placeholder={"Enter Password"}
+            placeholderTextColor={"#FFFFFF"}
+            secureTextEntry
+          />
+          <TouchableOpacity
+            style={[styles.button, { marginTop: 20 }]}
+            onPress={() => this.signIn(email, password)}
+          >
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => this.props.navigation.navigate("RegisterScreen")}
+          >
+            <Text style={styles.buttonTextNewUser}>New User ?</Text>
+          </TouchableOpacity>
         </View>
       );
     }
@@ -167,31 +103,37 @@ export default class LoginScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#15193c"
+    backgroundColor: "#15193c",
+    alignItems: "center",
+    justifyContent: "center"
   },
   droidSafeArea: {
     marginTop: Platform.OS === "android" ? StatusBar.currentHeight : RFValue(35)
   },
-  appTitle: {
-    flex: 0.4,
-    justifyContent: "center",
-    alignItems: "center"
-  },
   appIcon: {
-    width: RFValue(130),
-    height: RFValue(130),
-    resizeMode: "contain"
+    width: RFValue(200),
+    height: RFValue(200),
+    resizeMode: "contain",
+    marginBottom: RFValue(20)
   },
   appTitleText: {
     color: "white",
     textAlign: "center",
     fontSize: RFValue(40),
-    fontFamily: "Bubblegum-Sans"
+    fontFamily: "Bubblegum-Sans",
+    marginBottom: RFValue(20)
   },
-  buttonContainer: {
-    flex: 0.3,
-    justifyContent: "center",
-    alignItems: "center"
+  textinput: {
+    width: RFValue(250),
+    height: RFValue(50),
+    padding: RFValue(10),
+    borderColor: "#FFFFFF",
+    borderWidth: RFValue(4),
+    borderRadius: RFValue(10),
+    fontSize: RFValue(20),
+    color: "#FFFFFF",
+    backgroundColor: "#15193c",
+    fontFamily: "Bubblegum-Sans"
   },
   button: {
     width: RFValue(250),
@@ -200,25 +142,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     alignItems: "center",
     borderRadius: RFValue(30),
-    backgroundColor: "white"
+    backgroundColor: "white",
+    marginBottom: RFValue(20)
   },
-  googleIcon: {
-    width: RFValue(30),
-    height: RFValue(30),
-    resizeMode: "contain"
-  },
-  googleText: {
-    color: "black",
-    fontSize: RFValue(20),
+  buttonText: {
+    fontSize: RFValue(24),
+    color: "#15193c",
     fontFamily: "Bubblegum-Sans"
   },
-  cloudContainer: {
-    flex: 0.3
-  },
-  cloudImage: {
-    position: "absolute",
-    width: "100%",
-    resizeMode: "contain",
-    bottom: RFValue(-5)
+  buttonTextNewUser: {
+    fontSize: RFValue(12),
+    color: "#FFFFFF",
+    fontFamily: "Bubblegum-Sans",
+    textDecorationLine: 'underline'
   }
 });
+

@@ -11,10 +11,12 @@ import {
 import { RFValue } from "react-native-responsive-fontsize";
 import StoryCard from "./StoryCard";
 
-import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 import { FlatList } from "react-native-gesture-handler";
 import firebase from "firebase";
+
+import * as SplashScreen from 'expo-splash-screen';
+SplashScreen.preventAutoHideAsync();
 
 let customFonts = {
   "Bubblegum-Sans": require("../assets/fonts/BubblegumSans-Regular.ttf")
@@ -86,9 +88,8 @@ export default class Feed extends Component {
   keyExtractor = (item, index) => index.toString();
 
   render() {
-    if (!this.state.fontsLoaded) {
-      return <AppLoading />;
-    } else {
+    if (this.state.fontsLoaded) {
+      SplashScreen.hideAsync();
       return (
         <View
           style={

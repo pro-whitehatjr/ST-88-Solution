@@ -14,10 +14,11 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { RFValue } from "react-native-responsive-fontsize";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as Speech from "expo-speech";
-
-import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 import firebase from "firebase";
+
+import * as SplashScreen from 'expo-splash-screen';
+SplashScreen.preventAutoHideAsync();
 
 let customFonts = {
   "Bubblegum-Sans": require("../assets/fonts/BubblegumSans-Regular.ttf")
@@ -73,9 +74,8 @@ export default class StoryScreen extends Component {
   render() {
     if (!this.props.route.params) {
       this.props.navigation.navigate("Home");
-    } else if (!this.state.fontsLoaded) {
-      return <AppLoading />;
-    } else {
+    } else if (this.state.fontsLoaded) {
+      SplashScreen.hideAsync();
       return (
         <View
           style={
