@@ -56,13 +56,14 @@ export default class StoryScreen extends Component {
       });
   };
 
-  async initiateTTS(title, author, story, moral) {
+  async initiateTTS(title, story, moral) {
+    console.log(title)
     const current_color = this.state.speakerColor;
     this.setState({
       speakerColor: current_color === "gray" ? "#ee8249" : "gray"
     });
     if (current_color === "gray") {
-      Speech.speak(`${title} by ${author}`);
+      Speech.speak(title);
       Speech.speak(story);
       Speech.speak("The moral of the story is!");
       Speech.speak(moral);
@@ -123,7 +124,7 @@ export default class StoryScreen extends Component {
                         : styles.storyTitleText
                     }
                   >
-                    {this.props.route.params.story.title}
+                    {this.props.route.params.story.value.title}
                   </Text>
                   <Text
                     style={
@@ -132,7 +133,7 @@ export default class StoryScreen extends Component {
                         : styles.storyAuthorText
                     }
                   >
-                    {this.props.route.params.story.author}
+                    {this.props.route.params.story.value.author}
                   </Text>
                   <Text
                     style={
@@ -141,17 +142,16 @@ export default class StoryScreen extends Component {
                         : styles.storyAuthorText
                     }
                   >
-                    {this.props.route.params.story.created_on}
+                    {this.props.route.params.story.value.created_on}
                   </Text>
                 </View>
                 <View style={styles.iconContainer}>
                   <TouchableOpacity
                     onPress={() =>
                       this.initiateTTS(
-                        this.props.route.params.title,
-                        this.props.route.params.author,
-                        this.props.route.params.story,
-                        this.props.route.params.moral
+                        this.props.route.params.story.value.title,
+                        this.props.route.params.story.value.story,
+                        this.props.route.params.story.value.moral
                       )
                     }
                   >
@@ -172,7 +172,7 @@ export default class StoryScreen extends Component {
                       : styles.storyText
                   }
                 >
-                  {this.props.route.params.story.story}
+                  {this.props.route.params.story.value.story}
                 </Text>
                 <Text
                   style={
@@ -181,7 +181,7 @@ export default class StoryScreen extends Component {
                       : styles.moralText
                   }
                 >
-                  Moral - {this.props.route.params.story.moral}
+                  Moral - {this.props.route.params.story.value.moral}
                 </Text>
               </View>
               <View style={styles.actionContainer}>

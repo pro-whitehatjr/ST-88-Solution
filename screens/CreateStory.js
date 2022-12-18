@@ -47,17 +47,19 @@ export default class CreateStory extends Component {
 
   async addStory() {
     if (this.state.title && this.state.description && this.state.story && this.state.moral) {
+      var d = new Date()
       let storyData = {
         preview_image: this.state.previewImage,
         title: this.state.title,
         description: this.state.description,
         story: this.state.story,
         moral: this.state.moral,
-        author: firebase.auth().currentUser.displayName,
-        created_on: new Date(),
+        // author: firebase.auth().currentUser.displayName,
+        created_on: d.toString(),
         author_uid: firebase.auth().currentUser.uid,
         likes: 0
       }
+      console.log(storyData)
       await firebase
         .database()
         .ref("/posts/" + (Math.random().toString(36).slice(2)))
